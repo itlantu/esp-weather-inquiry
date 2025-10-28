@@ -1,5 +1,5 @@
-#ifndef __WI_MY_WIFI_H__
-#define __WI_MY_WIFI_H__
+#ifndef __WI_WIFI_H__
+#define __WI_WIFI_H__
 
 #include "esp_err.h"
 #include "wi/config.h"
