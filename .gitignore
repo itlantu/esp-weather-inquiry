@@ -1,0 +1,15 @@
+# build
+build/
+cmake-build-*
+
+# sdkconfig
+sdkconfig
+sdkconfig.old
+
+# idea
+.idea
+.vs
+.vscode
+
+# container
+.devcontainer
