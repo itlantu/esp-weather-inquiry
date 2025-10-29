@@ -13,3 +13,6 @@ sdkconfig.old
 
 # container
 .devcontainer
+
+# env
+.env
