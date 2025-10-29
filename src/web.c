@@ -1,7 +1,7 @@
 #include "wi/web.h"
 #include <malloc.h>
+#include <string.h>
 #include "esp_log.h"
-
 
 #include "wi/config.h"
 
@@ -25,9 +25,18 @@ esp_err_t root_get_handler(httpd_req_t *req) {
 	size_t index_html_length;
 	const char* index_html = get_index_html(&index_html_length);
 
+	// 移除了最后两个导致乱码的字符
+	index_html_length -= 2;
+	char* response = malloc(sizeof(char) * (index_html_length + 1));
+	for (size_t i = 0; i < index_html_length; ++i)
+		response[i] = index_html[i];
+	response[index_html_length] = '\0';
+
 	// 发送网页
 	httpd_resp_set_type(req, "text/html");
-	httpd_resp_send(req, index_html, HTTPD_RESP_USE_STRLEN);
+	httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
+
+	free(response);
 
 	return ESP_OK;
 }
