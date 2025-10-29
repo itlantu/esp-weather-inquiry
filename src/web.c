@@ -36,6 +36,7 @@ esp_err_t root_get_handler(httpd_req_t *req) {
 	httpd_resp_set_type(req, "text/html");
 	httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
 
+	// 回收内存
 	free(response);
 
 	return ESP_OK;
