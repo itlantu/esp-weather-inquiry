@@ -1,6 +1,7 @@
 set(sources
-        "main.c"
-        "wifi.c"
+    "main.c"
+    "wifi.c"
+    "nvs.c"
 )
 
 idf_component_register(
