@@ -11,13 +11,14 @@ extern const uint8_t binary_index_html_start[] asm("_binary_index_html_start");
 extern const uint8_t binary_index_html_end[] asm("_binary_index_html_end");
 
 const char* get_index_html(size_t* length) {
-	*length = binary_index_html_end - binary_index_html_start;
-	ESP_LOGI(LOG_TAG, "index.html计算后的长度为%u", *length);
+	size_t index_html_length = binary_index_html_end - binary_index_html_start;
+	const char* result = (const char*)binary_index_html_start;
 
 	// 打印原始内容
-	// ESP_LOGI(LOG_TAG, "打印前 %d 个字节：\n%.*s\n", *length, *length, binary_index_html_start);
+	// ESP_LOGI(LOG_TAG, "打印前 %d 个字节：\n%.*s\n", *length, *index_html_length, binary_index_html_start);
 
-	const char* result = (const char*)binary_index_html_start;
+	ESP_LOGI(LOG_TAG, "index.html计算后的长度为%u", index_html_length);
+	*length = index_html_length;
 	return result;
 }
 
@@ -25,38 +26,43 @@ esp_err_t root_get_handler(httpd_req_t *req) {
 	size_t index_html_length;
 	const char* index_html = get_index_html(&index_html_length);
 
-	// 移除了最后两个导致乱码的字符
-	index_html_length -= 2;
-	char* response = malloc(sizeof(char) * (index_html_length + 1));
-	for (size_t i = 0; i < index_html_length; ++i)
-		response[i] = index_html[i];
-	response[index_html_length] = '\0';
-
 	// 发送网页
 	httpd_resp_set_type(req, "text/html");
-	httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
-
-	// 回收内存
-	free(response);
+	httpd_resp_send(req, index_html, index_html_length);
 
 	return ESP_OK;
 }
-esp_err_t weather_get_handler(httpd_req_t *req) {
+esp_err_t weather_handler(httpd_req_t *req) {
+	static char buffer[1024];
+	int data_length = httpd_req_recv(req, buffer, sizeof(buffer) - 1);
+
+	if (data_length <= 0) {
+		ESP_LOGW(LOG_TAG, "未接收到数据");
+		return ESP_ERR_INVALID_STATE;
+	}
+	// 确保字符串终止
+	buffer[data_length] = '\0'; 
+	ESP_LOGI(LOG_TAG, "接收到POST数据: %s", buffer);
+
 	return ESP_OK;
+};
+
+
+const httpd_uri_t root = {
+	.uri = "/",
+	.method = HTTP_GET,
+	.handler = root_get_handler
+};
+
+const httpd_uri_t weather = {
+	.uri = "/weather",
+	.method = HTTP_POST,
+	.handler = weather_handler
 };
 
 esp_err_t wi_start_webserver(httpd_handle_t* server) {
 	static httpd_config_t web_httpd_config = HTTPD_DEFAULT_CONFIG();
-	static const httpd_uri_t root = {
-		.uri = "/",
-		.method = HTTP_GET,
-		.handler = root_get_handler
-	};
-	static const httpd_uri_t weather = {
-		.uri = "/weather",
-		.method = HTTP_GET,
-		.handler = weather_get_handler
-	};
+	
 
 	ESP_LOGI(LOG_TAG, "执行start_webserver");
 
