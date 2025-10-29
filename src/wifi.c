@@ -6,6 +6,8 @@
 #include "esp_http_server.h"
 #include "nvs_flash.h"
 
+#include "wi/nvs.h"
+
 #define LOG_TAG "wi_wifi"
 httpd_handle_t server_handle = NULL;
 
@@ -45,11 +47,7 @@ static void ip_event_handler(void* args, esp_event_base_t event_base, int32_t ev
 esp_err_t wi_wifi_init(){
     ESP_LOGI(LOG_TAG, "执行wi_wifi_init");
     // 初始化
-    esp_err_t err_code = nvs_flash_init();
-    if (err_code == ESP_ERR_NVS_NO_FREE_PAGES || err_code == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ESP_ERROR_CHECK(nvs_flash_init());
-    }
+    wi_nvs_init();
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
