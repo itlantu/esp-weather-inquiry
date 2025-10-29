@@ -1,12 +1,12 @@
-#include "wi/wifi.h"
+#include "wi/comm/wifi.h"
 #include "esp_wifi.h"
 #include "esp_mac.h"
 #include "esp_log.h"
 #include "esp_http_client.h"
 #include "esp_http_server.h"
 
+#include "wi/comm/web.h"
 #include "wi/nvs.h"
-#include "wi/web.h"
 #include "wi/config.h"
 
 #define LOG_TAG "wi_wifi"
