@@ -18,17 +18,33 @@ const char* get_index_html(size_t* length) {
 	// ESP_LOGI(LOG_TAG, "打印前 %d 个字节：\n%.*s\n", *length, *index_html_length, binary_index_html_start);
 
 	ESP_LOGI(LOG_TAG, "index.html计算后的长度为%u", index_html_length);
-	*length = index_html_length;
+	*length = index_html_length - 2;
 	return result;
 }
 
 esp_err_t root_get_handler(httpd_req_t *req) {
-	size_t index_html_length;
-	const char* index_html = get_index_html(&index_html_length);
+	static char* response = NULL;
+	static size_t response_length = 0;
+
+	// 初始化response
+	if(response == NULL) {
+		ESP_LOGI(LOG_TAG, "root_get_handler初始化html页面内容");
+
+		size_t index_html_length;
+		const char* index_html = get_index_html(&index_html_length);
+		response_length = index_html_length - 2;
+
+		if((response = malloc(index_html_length)) == NULL){
+			ESP_LOGE(LOG_TAG, "response内存分配失败");
+			return ESP_FAIL;
+		}
+		memset(response, 0, index_html_length);
+		snprintf(response, index_html_length, index_html, "");
+	}
 
 	// 发送网页
 	httpd_resp_set_type(req, "text/html");
-	httpd_resp_send(req, index_html, index_html_length);
++	httpd_resp_send(req, response, response_length);
 
 	return ESP_OK;
 }
@@ -43,6 +59,8 @@ esp_err_t weather_handler(httpd_req_t *req) {
 	// 确保字符串终止
 	buffer[data_length] = '\0'; 
 	ESP_LOGI(LOG_TAG, "接收到POST数据: %s", buffer);
+
+	// todo 发送网页
 
 	return ESP_OK;
 };
@@ -62,7 +80,6 @@ const httpd_uri_t weather = {
 
 esp_err_t wi_start_webserver(httpd_handle_t* server) {
 	static httpd_config_t web_httpd_config = HTTPD_DEFAULT_CONFIG();
-	
 
 	ESP_LOGI(LOG_TAG, "执行start_webserver");
 
