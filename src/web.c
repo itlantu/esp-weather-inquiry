@@ -7,19 +7,17 @@
 
 #define LOG_TAG "wi_web"
 
-extern const uint8_t binary_web_index_html_start[] asm("_binary_index_html_start");
-extern const uint8_t binary_web_index_html_end[] asm("_binary_index_html_end");
+extern const uint8_t binary_index_html_start[] asm("_binary_index_html_start");
+extern const uint8_t binary_index_html_end[] asm("_binary_index_html_end");
 
 const char* get_index_html(size_t* length) {
-	*length = binary_web_index_html_end - binary_web_index_html_start;
+	*length = binary_index_html_end - binary_index_html_start;
 	ESP_LOGI(LOG_TAG, "index.html计算后的长度为%u", *length);
 
 	// 打印原始内容
-	for (size_t i = 0; i <*length; ++i)
-		putchar(binary_web_index_html_start[i]);
-	printf("\r\n");
+	// ESP_LOGI(LOG_TAG, "打印前 %d 个字节：\n%.*s\n", *length, *length, binary_index_html_start);
 
-	const char* result = (const char*)binary_web_index_html_start;
+	const char* result = (const char*)binary_index_html_start;
 	return result;
 }
 
@@ -28,7 +26,7 @@ esp_err_t root_get_handler(httpd_req_t *req) {
 	const char* index_html = get_index_html(&index_html_length);
 
 	// 发送网页
-	httpd_resp_set_type(req, "text/html; charset=utf-8");
+	httpd_resp_set_type(req, "text/html");
 	httpd_resp_send(req, index_html, HTTPD_RESP_USE_STRLEN);
 
 	return ESP_OK;
