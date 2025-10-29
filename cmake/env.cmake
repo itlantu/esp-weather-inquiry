@@ -34,3 +34,14 @@ function(function_env_read env_file_path)
     endforeach()
     message(STATUS "-----------")
 endfunction()
+
+# 将环境变量的值加载到宏中
+function(fucntion_target_env2marco target env_name)
+    if(NOT DEFINED ENV{${env_name}})
+        message(WARNING " ${env_name}未配置")
+        return()
+    endif()
+
+    target_compile_definitions(${target} PRIVATE ${env_name}=$ENV{${env_name}})
+    message(STATUS " [*]${env_name}=$ENV{${env_name}}")
+endfunction()
