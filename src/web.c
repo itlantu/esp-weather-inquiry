@@ -61,7 +61,7 @@ esp_err_t wi_start_webserver(httpd_handle_t* server) {
 	ESP_LOGI(LOG_TAG, "执行start_webserver");
 
 	// 启动httpd服务器
-	web_httpd_config.server_port = WI_CONFIG_WEB_PORT;
+	web_httpd_config.server_port = WI_Config.web.port;
 	const esp_err_t err_code = httpd_start(server, &web_httpd_config);
 	if (err_code != ESP_OK) {
 		ESP_LOGE(LOG_TAG, "启动web服务器出错!");
