@@ -4,10 +4,10 @@
 #include "esp_log.h"
 #include "esp_http_client.h"
 #include "esp_http_server.h"
-#include "nvs_flash.h"
 
 #include "wi/nvs.h"
 #include "wi/web.h"
+#include "wi/config.h"
 
 #define LOG_TAG "wi_wifi"
 httpd_handle_t server_handle = NULL;
@@ -39,6 +39,8 @@ static void ip_event_handler(void* args, esp_event_base_t event_base, int32_t ev
 
     const ip_event_got_ip_t* ipv4_event = (ip_event_got_ip_t*)event_data;
     const esp_ip4_addr_t* ipv4_addr = &(ipv4_event->ip_info.ip);
+	// 记录IP
+	WI_Config.web.host_ip = ipv4_event->ip_info.ip;
     ESP_LOGI(LOG_TAG, "本机获取到IP: " IPSTR, IP2STR(ipv4_addr));
     if (server_handle == NULL) {
         wi_start_webserver(&server_handle);
@@ -64,12 +66,10 @@ esp_err_t wi_wifi_init(){
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_handler, NULL));
 
     // 配置wifi
-    wifi_config_t wifi_config = {
-        .sta = {
-            .ssid = WI_CONFIG_WIFI_SSID,
-            .password = WI_CONFIG_WIFI_PASSWORD,
-        }
-    };
+    wifi_config_t wifi_config = {0};
+	strncpy((char*)wifi_config.sta.ssid, WI_Config.wifi.ssid, strlen(WI_Config.wifi.ssid));
+	strncpy((char*)wifi_config.sta.password, WI_Config.wifi.password, strlen(WI_Config.wifi.password));
+	ESP_LOGI(LOG_TAG, "尝试连接wifi: %s | 密码: %s", (char*)wifi_config.sta.ssid, (char*)wifi_config.sta.password);
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
