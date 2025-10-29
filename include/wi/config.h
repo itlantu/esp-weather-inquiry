@@ -22,8 +22,8 @@
 
 struct WI_Config_t{
 	struct {
-		uint8_t ssid[32];
-		uint8_t password[64];
+		char ssid[32];
+		char password[64];
 	}wifi;
 	struct {
 		esp_ip4_addr_t host_ip;
