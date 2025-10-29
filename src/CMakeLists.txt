@@ -20,4 +20,6 @@ idf_component_register(
         nvs_flash
         esp_http_client
         esp_http_server
+    EMBED_FILES
+        "web/index.html"
 )
