@@ -4,10 +4,13 @@
 #include "esp_log.h"
 #include "esp_netif_ip_addr.h"
 
+/* 默认配置 */
 #define WI_CONFIG_DEFAULT_WIFI_SSID "ssid"
 #define WI_CONFIG_DEFAULT_WIFI_PASSWORD  "password"
 #define WI_CONFIG_DEFAULT_WEB_PORT 80
+#define WI_CONFIG_DEFAULT_UART_BAUD_RATE 115200
 
+/* 配置项 */
 #ifndef WI_CONFIG_WIFI_SSID
 #define WI_CONFIG_WIFI_SSID WI_CONFIG_DEFAULT_WIFI_SSID
 #endif
@@ -20,6 +23,11 @@
 #define WI_CONFIG_WEB_PORT WI_CONFIG_DEFAULT_WEB_PORT
 #endif
 
+#ifndef WI_CONFIG_UART_BAUD_RATE
+#define WI_CONFIG_UART_BAUD_RATE WI_CONFIG_DEFAULT_UART_BAUD_RATE
+#endif
+
+/* 结构体与函数声明 */
 struct WI_Config_t{
 	struct {
 		char ssid[32];
@@ -32,7 +40,6 @@ struct WI_Config_t{
 };
 
 extern struct WI_Config_t WI_Config;
-
 extern char wi_config_init_flag;
 
 void wi_config_init();
