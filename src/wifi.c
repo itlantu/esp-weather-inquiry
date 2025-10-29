@@ -7,6 +7,7 @@
 #include "nvs_flash.h"
 
 #include "wi/nvs.h"
+#include "wi/web.h"
 
 #define LOG_TAG "wi_wifi"
 httpd_handle_t server_handle = NULL;
@@ -40,7 +41,7 @@ static void ip_event_handler(void* args, esp_event_base_t event_base, int32_t ev
     const esp_ip4_addr_t* ipv4_addr = &(ipv4_event->ip_info.ip);
     ESP_LOGI(LOG_TAG, "本机获取到IP: " IPSTR, IP2STR(ipv4_addr));
     if (server_handle == NULL) {
-        // todo 启动web
+        wi_start_webserver(&server_handle);
     }
 }
 
