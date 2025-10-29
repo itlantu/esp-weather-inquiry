@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "wi/wifi.h"
+#include "wi/comm/wifi.h"
 
 #define LOG_TAG "wi_main"
 
