@@ -12,39 +12,10 @@ extern const uint8_t binary_index_html_start[] asm("_binary_index_html_start");
 extern const uint8_t binary_index_html_end[] asm("_binary_index_html_end");
 
 const char *get_index_html(size_t *length) {
-	const size_t index_html_length = binary_index_html_end - binary_index_html_start;
 	const char *result = (const char *) binary_index_html_start;
-
-	ESP_LOGI(LOG_TAG, "index.html计算后的长度为%u", index_html_length);
-	*length = index_html_length - 2;
+	*length = binary_index_html_end - binary_index_html_start;
+	ESP_LOGI(LOG_TAG, "index.html数据的长度为%u", *length);
 	return result;
-}
-
-esp_err_t url_decode(char* result, const char *str) {
-	size_t len = strlen(str);
-	if(result == NULL)
-		return ESP_FAIL;
-
-	size_t i, j = 0;
-	for (i = 0; i < len; ++i) {
-		if (str[i] == '%' && i + 2 < len) {
-			char hex[3] = {str[i + 1], str[i + 2], '\0'};
-			char *endptr;
-			long hex_value = strtol(hex, &endptr, 16);
-
-			if (*endptr == '\0') {
-				result[j++] = (char) hex_value;
-				i += 2;
-			} else 
-				result[j++] = str[i];
-			
-		} else if (str[i] == '+')
-			result[j++] = ' ';
-		else 
-			result[j++] = str[i];
-	}
-	result[j] = '\0';
-	return ESP_OK;
 }
 
 esp_err_t root_get_handler(httpd_req_t *req) {
@@ -55,16 +26,17 @@ esp_err_t root_get_handler(httpd_req_t *req) {
 	if (response == NULL) {
 		ESP_LOGI(LOG_TAG, "root_get_handler初始化html页面内容");
 
-		size_t index_html_length;
-		const char *index_html = get_index_html(&index_html_length);
-		response_length = index_html_length - 2;
-
-		if ((response = malloc(index_html_length)) == NULL) {
-			ESP_LOGE(LOG_TAG, "response内存分配失败");
-			return ESP_FAIL;
-		}
-		memset(response, 0, index_html_length);
-		snprintf(response, index_html_length, index_html, "");
+		const char *index_html = get_index_html(&response_length);
+		// 格式化html内容
+		ESP_ERROR_CHECK((response = malloc(response_length)) == NULL ? ESP_ERR_NO_MEM : ESP_OK);
+		snprintf(response, response_length, index_html, "");
+		
+		size_t html_end_pos = 0;
+		ESP_ERROR_CHECK(wi_paser_get_str_find(index_html, "</html>", &html_end_pos));
+		// 更新response_length
+		response_length = strlen(response);
+		response_length -= response_length - html_end_pos;
+		ESP_LOGI(LOG_TAG, "解析后的index.html数据的长度为%u", response_length);
 	}
 
 	// 发送网页
