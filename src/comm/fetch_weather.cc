@@ -6,28 +6,47 @@
 
 #define LOG_TAG "wi_fetch_weather"
 // 天气API网址
-#define WEATHER_API_BASE_URL "http://t.weather.itboy.net/api/weather/city/"
+#define WEATHER_API_BASE_URL "http://t.weather.itboy.net/api/weather/city/" 
+
+esp_err_t http_event_on_data_handler(esp_http_client_event_t* event, std::string& buffer){
+    if(esp_http_client_is_chunked_response(event->client)){
+        ESP_LOGE(LOG_TAG, "当前代码不支持分块传输");
+        return ESP_ERR_NOT_SUPPORTED;
+    }
+
+    buffer.append((char*)event->data, event->data_len);
+}
+
+void process_weather_data(const std::string& json_data, char* html_content){
+    
+}
 
 esp_err_t http_event_handler(esp_http_client_event_t* event){
-    static char *response_buffer = NULL;
-    static size_t response_len = 0;
-    
+    static std::string buffer;
+    static std::string html_content;
+
     switch(event->event_id) {
         // 处理HTTP事件：接收到数据
         case HTTP_EVENT_ON_DATA:
-            break;
+            ESP_ERROR_CHECK(http_event_on_data_handler(event, buffer));
+        break;
     
         // 处理HTTP事件：请求完成
         case HTTP_EVENT_ON_FINISH:
-            break;
+            ESP_LOGI(LOG_TAG, "HTTP请求完成, 响应数据长度: %d", buffer.size());
+            buffer.clear();
+            process_weather_data(buffer);
+        break;
         
         // 处理HTTP事件：请求错误
         case HTTP_EVENT_ERROR:
             ESP_LOGE(LOG_TAG, "HTTP请求错误");
+            buffer.clear();
             break;
         
         // 默认情况，不处理
         default:
+            buffer.clear();
         break;
     }
     return ESP_OK;
