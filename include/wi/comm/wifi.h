@@ -1,9 +1,9 @@
-#ifndef __WI_WIFI_H__
-#define __WI_WIFI_H__
+#ifndef WI_COMM_WIFI_H
+#define WI_COMM_WIFI_H
 
 #include "esp_err.h"
 #include "wi/config.h"
 
 esp_err_t wi_wifi_init();
 
-#endif // __WI_MY_WIFI_H__
+#endif // WI_COMM_WIFI_H

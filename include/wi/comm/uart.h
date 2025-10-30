@@ -1,5 +1,5 @@
-#ifndef __WI_UART_H__
-#define __WI_UART_H__
+#ifndef WI_COMM_UART_H
+#define WI_COMM_UART_H
 
 
 
