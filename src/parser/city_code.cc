@@ -1,8 +1,6 @@
 #include "wi/parser/city_code.h"
 #include <string_view>
 #include <cstring>
-#include <string>
-#include <bitset>
 #include <map>
 #include "esp_log.h"
 #include "esp_http_server.h"
@@ -19,15 +17,6 @@ const std::map<const char*, const char*, CStrCompare> city_codes{
     #include "wi/parser/city_code.inc"
 };
 
-
-std::string to_ascii(const std::string& s){
-    std::string result;
-    for(const auto ch: s){
-        std::bitset<8> bits(ch);
-        result += bits.to_string();
-    }
-    return result;
-}
 
 esp_err_t wi_get_city_code(char* code, const char* name){
     if(!city_codes.count(name)){
@@ -100,5 +89,16 @@ esp_err_t wi_paser_post(const char* buffer, const int data_length, char* city_na
     //     city_name[city_name_length - 1] = '\0';
     // }
 
+    return ESP_OK;
+}
+
+esp_err_t wi_paser_get_str_find(const char* str, const char* find, size_t* start_pos){
+    std::string_view str_view{str};
+    size_t pos = str_view.find(find);
+
+    if(pos == std::string_view::npos)
+        return ESP_FAIL;
+    *start_pos = pos;
+    
     return ESP_OK;
 }
