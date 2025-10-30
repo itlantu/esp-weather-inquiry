@@ -1,4 +1,6 @@
 file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
+list(APPEND sources "${CMAKE_CURRENT_SOURCE_DIR}/parser/city_code.cc")
+
 get_filename_component(include_dirs "${CMAKE_CURRENT_SOURCE_DIR}/../include" ABSOLUTE)
 
 message(STATUS " sources: ${sources}")
@@ -17,6 +19,9 @@ idf_component_register(
     EMBED_FILES
         "web/index.html"
 )
+
+target_compile_features(${COMPONENT_LIB} PRIVATE cxx_std_20)
+target_compile_options(${COMPONENT_LIB} PRIVATE -finput-charset=UTF-8)
 
 # 从.env文件中加载环境变量
 get_filename_component(env_file_path "${CMAKE_CURRENT_SOURCE_DIR}/../.env" ABSOLUTE)
