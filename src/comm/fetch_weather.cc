@@ -17,7 +17,7 @@ esp_err_t http_event_on_data_handler(esp_http_client_event_t* event, std::string
     buffer.append((char*)event->data, event->data_len);
 }
 
-void process_weather_data(const std::string& json_data, char* html_content){
+void process_weather_data(const std::string& json_data, std::string& html_content){
     
 }
 
@@ -35,7 +35,7 @@ esp_err_t http_event_handler(esp_http_client_event_t* event){
         case HTTP_EVENT_ON_FINISH:
             ESP_LOGI(LOG_TAG, "HTTP请求完成, 响应数据长度: %d", buffer.size());
             buffer.clear();
-            process_weather_data(buffer);
+            process_weather_data(buffer, html_content);
         break;
         
         // 处理HTTP事件：请求错误
