@@ -1,5 +1,8 @@
 file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
-list(APPEND sources "${CMAKE_CURRENT_SOURCE_DIR}/parser/city_code.cc")
+list(APPEND sources 
+    "${CMAKE_CURRENT_SOURCE_DIR}/parser/city_code.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/comm/fetch_weather.cc"
+)
 
 get_filename_component(include_dirs "${CMAKE_CURRENT_SOURCE_DIR}/../include" ABSOLUTE)
 
