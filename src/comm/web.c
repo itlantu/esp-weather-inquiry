@@ -29,7 +29,7 @@ esp_err_t root_get_handler(httpd_req_t *req) {
 	// 格式化html内容
 	ESP_ERROR_CHECK((response = malloc(response_length)) == NULL ? ESP_ERR_NO_MEM : ESP_OK);
 	// snprintf(response, response_length, index_html, fetch_html_content);
-	wi_fetch_html_join(response, index_html, response_length);
+	wi_fetch_html_join(response, index_html, &response_length);
 	
 	size_t html_end_pos = 0;
 	// ESP_LOGI(LOG_TAG, "[debug]解析内容数据(%d): %s", strlen(fetch_html_content), fetch_html_content);
