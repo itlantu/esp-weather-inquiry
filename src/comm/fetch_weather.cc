@@ -8,12 +8,13 @@
 #include "esp_log.h"
 #include "esp_http_client.h"
 #include "cJSON.h"
+#include "wi/nvs.h"
 
 #define LOG_TAG "wi_fetch_weather"
 // 天气API网址
 #define WEATHER_API_BASE_URL "http://t.weather.itboy.net/api/weather/city/" 
 
-static std::string fetch_html_content;
+std::string fetch_html_content;
 
 esp_err_t json_get_from_data(std::string& result, cJSON* root, const std::string& key) {
     ESP_ERROR_CHECK(root == nullptr ? ESP_ERR_INVALID_ARG : ESP_OK);
@@ -24,7 +25,7 @@ esp_err_t json_get_from_data(std::string& result, cJSON* root, const std::string
         cJSON* forecast = cJSON_GetObjectItem(root, "forecast");
         if(forecast != nullptr && cJSON_IsArray(forecast) && cJSON_GetArraySize(forecast) > 0){
             cJSON* today = cJSON_GetArrayItem(forecast, 0);
-            value = cJSON_GetObjectItem(forecast->child, key.c_str());
+            value = cJSON_GetObjectItem(today, key.c_str());
         }else{
             ESP_LOGE(LOG_TAG, "未找到键: %s", key.c_str());
             return ESP_ERR_INVALID_ARG;
@@ -96,6 +97,11 @@ esp_err_t process_weather_data(const std::string& json_data){
     }
 
     fetch_html_content += "</table></div>";
+    // 写入history
+    std::string history_data = std::format("{0}({1})", 
+        cJSON_GetObjectItem(city_info, "city")->valuestring,
+        cJSON_GetObjectItem(root, "time")->valuestring);
+    wi_nvs_save_history(history_data.c_str());
     cJSON_Delete(root);
 
     return ESP_OK;
@@ -172,7 +178,10 @@ esp_err_t wi_fetch_weather(const char *city_code){
 }
 
 esp_err_t wi_fetch_html_join(char *result, const char* index_content, const size_t html_content_length){
-    snprintf(result, html_content_length, index_content, fetch_html_content.c_str());
+    static char history_data[100];
+    wi_nvs_load_history(history_data);
+    snprintf(result, html_content_length, index_content, history_data, fetch_html_content.c_str());
+
     return ESP_OK;
 }
 
