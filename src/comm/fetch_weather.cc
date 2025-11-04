@@ -183,3 +183,16 @@ esp_err_t wi_fetch_weather(const char *city_code){
     
     return err_code;
 }
+
+esp_err_t wi_fetch_html_join(char *result, const char* index_content, const size_t html_content_length){
+    snprintf(result, html_content_length, index_content, fetch_html_content.c_str());
+    return ESP_OK;
+}
+
+size_t wi_get_fetch_html_size(){
+    return fetch_html_content.size();
+}
+
+void wi_fetch_clear(){
+    fetch_html_content.clear();
+}
