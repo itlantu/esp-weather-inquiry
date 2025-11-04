@@ -85,16 +85,16 @@ esp_err_t wi_paser_post(const char* buffer, const int data_length, char* city_na
     return ESP_OK;
 }
 
-esp_err_t wi_paser_get_str_find(const char* str, const char* find, size_t* start_pos){
+esp_err_t wi_paser_get_str_find(const char* str, const char* find, size_t* end_pos){
     std::string_view str_view{str};
     size_t pos = str_view.find(find);
 
     if(pos == std::string_view::npos){
-        *start_pos = 0;
+        *end_pos = 0;
         ESP_LOGW(LOG_TAG, "未检测到字符串: %s", find);
         // return ESP_FAIL;
     }else{
-        *start_pos = pos;
+        *end_pos = pos + strlen(find);
     }
     
     return ESP_OK;

@@ -9,7 +9,7 @@ extern "C" {
 
 esp_err_t wi_get_city_code(char* code, const char* name);
 esp_err_t wi_paser_post(const char* buffer, int data_length, char* city_name);
-esp_err_t wi_paser_get_str_find(const char* str, const char* find, size_t* start_pos);
+esp_err_t wi_paser_get_str_find(const char* str, const char* find, size_t* end_pos);
 
 #ifdef __cplusplus
 }
