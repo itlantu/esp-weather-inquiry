@@ -7,38 +7,34 @@
     <title>ESP32天气查询</title>
     <style>
         body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background-color: #f5f7fa; color: #333; }
-        .page-container { max-width: 800px; margin: 0 auto; }
         h1 { color: #2c3e50; text-align: center; margin: 25px 0; font-weight: 600; letter-spacing: 0.5px; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 30px; }
+        .card {background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 30px; margin: 0 auto 30px; max-width: 550px; width: 100%; box-sizing: border-box;}
         form { display: flex; gap: 10px; margin: 25px 0; }
         input[type='text'] { flex: 1; padding: 12px 15px; font-size: 16px; border: 1px solid #e0e0e0; border-radius: 8px; transition: border 0.3s; }
         input[type='text']:focus { border-color: #42b983; outline: none; box-shadow: 0 0 0 2px rgba(66, 185, 131, 0.2); }
         input[type='submit'] { padding: 12px 25px; font-size: 16px; background-color: #42b983; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background 0.3s; font-weight: 500; }
         input[type='submit']:hover { background-color: #359e75; }
-        .weather-result { margin-top: 30px; }
         h2 { color: #2c3e50; margin: 0 0 20px 0; font-size: 22px; border-left: 4px solid #42b983; padding-left: 12px; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; }
         td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; }
         td:first-child { font-weight: 500; width: 35%; color: #555; background-color: #fafafa; }
-        .temp-high { color: #e74c3c; }
-        .temp-low { color: #3498db; }
-        .update-time { font-size: 14px; color: #999; text-align: right; margin-top: 10px; font-style: italic; }
+        .weather-table {width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; border-radius: 8px; overflow: hidden; }
+        .weather-table td {padding: 14px 18px; border-bottom: 1px solid #f0f0f0; font-size: 15px; transition: background-color 0.2s;}
+        .weather-table tr:last-child td {border-bottom: none;}
+        .weather-table td:first-child {font-weight: 500; width: 35%; color: #555; background-color: #f8f9fa;}
+        .weather-table tr:hover td {background-color: #f0f7ff;}
     </style>
 </head>
 
 <body>
     <h1>ESP32天气查询</h1>
     <div class="card">
-        <h2>测试POST查询</h2>
+        <h2>请输入城市名称</h2>
         <form method="POST" action="/weather">
             <input type="text" name="city" placeholder="输入城市名（如：北京）" required>
             <input type="submit" value="提交查询">
         </form>
     </div>
     %s
-    <!-- <div class="card post-result">
-        
-    </div> -->
-    
 </body>
 </html>
