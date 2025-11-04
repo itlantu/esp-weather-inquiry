@@ -81,13 +81,6 @@ esp_err_t wi_paser_post(const char* buffer, const int data_length, char* city_na
         ESP_LOGE(LOG_TAG, "POST数据city参数解码错误");
         return ESP_FAIL;
     }
-    // todo如果结尾为"市", 则删除"市"
-    // encode = city_name;
-    // auto city_name_length = encode.size();
-    // ESP_LOGI(LOG_TAG, "测试: %s", encode.substr(encode.size() - 1).data());
-    // if(encode.substr(encode.size() - 1) == "市"){
-    //     city_name[city_name_length - 1] = '\0';
-    // }
 
     return ESP_OK;
 }
@@ -96,9 +89,13 @@ esp_err_t wi_paser_get_str_find(const char* str, const char* find, size_t* start
     std::string_view str_view{str};
     size_t pos = str_view.find(find);
 
-    if(pos == std::string_view::npos)
-        return ESP_FAIL;
-    *start_pos = pos;
+    if(pos == std::string_view::npos){
+        *start_pos = 0;
+        ESP_LOGW(LOG_TAG, "未检测到字符串: %s", find);
+        // return ESP_FAIL;
+    }else{
+        *start_pos = pos;
+    }
     
     return ESP_OK;
 }
