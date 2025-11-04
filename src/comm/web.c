@@ -36,7 +36,8 @@ esp_err_t root_get_handler(httpd_req_t *req) {
 	
 	ESP_ERROR_CHECK(wi_paser_get_str_find(response, "</html>", &html_end_pos));
 	// 更新response_length
-	response_length -= response_length - html_end_pos;
+	if(html_end_pos != 0)
+		response_length -= response_length - html_end_pos;
 
 	ESP_LOGI(LOG_TAG, "index.html解析后的数据(%d): %s", strlen(index_html), index_html);
 	ESP_LOGI(LOG_TAG, "解析后的index.html数据的长度为%u", response_length);
