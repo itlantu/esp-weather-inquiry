@@ -4,8 +4,6 @@
 #include <tuple>
 #include <vector>
 #include <format>
-#include <chrono>
-#include <ctime>
 
 #include "esp_log.h"
 #include "esp_http_client.h"
@@ -16,18 +14,6 @@
 #define WEATHER_API_BASE_URL "http://t.weather.itboy.net/api/weather/city/" 
 
 static std::string fetch_html_content;
-
-const std::string& get_ymd(){
-    static std::string ymd{12, '\0'};
-    
-    const auto now = std::chrono::system_clock::now();
-    const auto now_time = std::chrono::system_clock::to_time_t(now);
-    // 线程不安全
-    std::tm* now_tm = std::localtime(&now_time);
-    std::strftime(&ymd[0], ymd.size(), "%Y-%m-%d", now_tm);
-    
-    return ymd;
-}
 
 esp_err_t json_get_from_data(std::string& result, cJSON* root, const std::string& key) {
     ESP_ERROR_CHECK(root == nullptr ? ESP_ERR_INVALID_ARG : ESP_OK);
