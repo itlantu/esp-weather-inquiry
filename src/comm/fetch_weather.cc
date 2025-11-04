@@ -40,6 +40,14 @@ esp_err_t json_get_from_data(std::string& result, cJSON* root, const std::string
         ESP_LOGE(LOG_TAG, "键 %s 的值类型不支持（非字符串/数字）", key.c_str());
         return ESP_ERR_INVALID_ARG;
     }
+
+    // 去掉高温和低温
+    if(key == "high"){
+        result = result.replace(0, result.size(), "高温");
+    }else if (key == "low"){
+        result = result.replace(0, result.size(), "低温");
+    }
+    
     return ESP_OK;
 }
 
@@ -177,10 +185,12 @@ esp_err_t wi_fetch_weather(const char *city_code){
     return err_code;
 }
 
-esp_err_t wi_fetch_html_join(char *result, const char* index_content, const size_t html_content_length){
+esp_err_t wi_fetch_html_join(char *result, const char* index_content, size_t* html_content_length){
     static char history_data[100];
     wi_nvs_load_history(history_data);
-    snprintf(result, html_content_length, index_content, history_data, fetch_html_content.c_str());
+    *html_content_length += strlen(history_data);
+
+    snprintf(result, *html_content_length, index_content, history_data, fetch_html_content.c_str());
 
     return ESP_OK;
 }
