@@ -29,12 +29,8 @@ const std::string& get_ymd(){
     return ymd;
 }
 
-esp_err_t json_get(std::string& result, const std::string_view json_view, const std::string& key) {
-    cJSON* root = cJSON_Parse(json_view.data());
-    if (root == nullptr) {
-        ESP_LOGE(LOG_TAG, "JSON解析失败: %s", cJSON_GetErrorPtr());
-        return ESP_ERR_INVALID_ARG;
-    }
+esp_err_t json_get_from_data(std::string& result, cJSON* root, const std::string& key) {
+    ESP_ERROR_CHECK(root == nullptr ? ESP_ERR_INVALID_ARG : ESP_OK);
 
     cJSON* value = cJSON_GetObjectItem(root, key.c_str());
     if (value == nullptr) {
@@ -45,7 +41,6 @@ esp_err_t json_get(std::string& result, const std::string_view json_view, const 
             value = cJSON_GetObjectItem(forecast->child, key.c_str());
         }else{
             ESP_LOGE(LOG_TAG, "未找到键: %s", key.c_str());
-            cJSON_Delete(root); 
             return ESP_ERR_INVALID_ARG;
         }
     }
@@ -56,26 +51,30 @@ esp_err_t json_get(std::string& result, const std::string_view json_view, const 
         result = std::to_string(value->valueint);
     } else {
         ESP_LOGE(LOG_TAG, "键 %s 的值类型不支持（非字符串/数字）", key.c_str());
-        cJSON_Delete(root);
         return ESP_ERR_INVALID_ARG;
     }
-    cJSON_Delete(root);
     return ESP_OK;
 }
 
+void json_to_html(cJSON* root, const std::string& key, const std::string& value){
+    static std::string json_value;
+    
+    json_value.clear();
+    ESP_ERROR_CHECK(json_get_from_data(json_value, root, key));
+    ESP_LOGI(LOG_TAG, "%s = %s", value.c_str(), json_value.c_str());
+    fetch_html_content += std::format("<tr><td>{0}</td><td>{1}</td></tr>", value, json_value);
+};
+
 esp_err_t process_weather_data(const std::string& json_data){
-    static std::vector<std::tuple<const std::string, const std::string>> tabs{
+    static std::vector<std::tuple<const std::string, const std::string>> data_tabs{
         {"week", "星期"},
         {"type", "天气"},
         {"high", "最高温度"},
         {"low", "最低温度"},
-        {"pm25", "pm25"},
         {"quality", "空气质量"},
         {"shidu", "湿度"},
         {"notice", "提示"},
     };
-    static const std::string start_string = "\"data\":";
-    static const std::string end_string = "},";
     static std::string json_value;
 
     fetch_html_content.clear();
@@ -85,31 +84,33 @@ esp_err_t process_weather_data(const std::string& json_data){
         return ESP_ERR_INVALID_ARG;
     }
 
-    size_t end_pos = 0, start_pos = 0;
-    
-    if((start_pos = json_data.find(start_string)) == std::string::npos){
-        ESP_LOGE(LOG_TAG, "json数据中未找到起始数据标志");
+    cJSON* root = cJSON_Parse(json_data.c_str());
+    if(root == nullptr){
+        ESP_LOGE(LOG_TAG, "JSON解析失败: %s", cJSON_GetErrorPtr());
         return ESP_ERR_INVALID_ARG;
     }
-    if((end_pos = json_data.find(end_string, start_pos)) == std::string::npos){
-        ESP_LOGE(LOG_TAG, "json数据中未找到结束数据标志");
+
+    cJSON* data = cJSON_GetObjectItem(root, "data");
+    cJSON* city_info = cJSON_GetObjectItem(root, "cityInfo");
+    if(data == nullptr || city_info == nullptr){
+        ESP_LOGE(LOG_TAG, "未找到data对象或cityInfo对象");
+        cJSON_Delete(root);
         return ESP_ERR_INVALID_ARG;
     }
 
     fetch_html_content += "<div id=\"weather-result\" class=\"card\"><table class=\"weather-table\">";
-    // fetch_html_content += std::format("<tr><td>日期</td><td>{0}</td></tr>", get_ymd());
 
-    start_pos += start_string.size();
-    std:: string_view json_view(json_data.data() + start_pos, end_pos - start_pos + 1);
-    // 解析json_view
-    for(const auto& [key, value]: tabs){
-        json_value.clear();
-        ESP_ERROR_CHECK(json_get(json_value, json_view, key));
-        ESP_LOGI(LOG_TAG, "%s = %s", value.c_str(), json_value.c_str());
-        fetch_html_content += std::format("<tr><td>{0}</td><td>{1}</td></tr>", value, json_value);
+    // 解析root和cityinfo部分
+    json_to_html(root, "time", "响应时间");
+    json_to_html(city_info, "city", "城市名称");
+    
+    // 解析data部分
+    for(const auto& [key, value]: data_tabs){
+        json_to_html(data, key, value);
     }
 
     fetch_html_content += "</table></div>";
+    cJSON_Delete(root);
 
     return ESP_OK;
 }
@@ -194,5 +195,6 @@ size_t wi_get_fetch_html_size(){
 }
 
 void wi_fetch_clear(){
+    ESP_LOGI(LOG_TAG, "清除天气数据");
     fetch_html_content.clear();
 }
