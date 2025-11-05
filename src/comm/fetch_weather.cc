@@ -42,10 +42,11 @@ esp_err_t json_get_from_data(std::string& result, cJSON* root, const std::string
     }
 
     // 去掉高温和低温
-    if(key == "high"){
-        result = result.replace(0, result.size(), "高温");
-    }else if (key == "low"){
-        result = result.replace(0, result.size(), "低温");
+    size_t pos = 0;
+    if(key == "high" && (pos = result.find("高温")) != std::string::npos){
+        result.erase(pos, strlen("高温"));
+    }else if (key == "low" && (pos = result.find("低温")) != std::string::npos){
+        result.erase(pos, strlen("低温"));
     }
     
     return ESP_OK;
