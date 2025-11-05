@@ -17,7 +17,7 @@ char nvs_init_flag = 0;
  */
 esp_err_t wi_nvs_init() {
     // 记录日志，表示开始执行NVS初始化
-    ESP_LOGI(LOG_TAG, "执行vi_nvs_init");
+    ESP_LOGI(LOG_TAG, "执行wi_nvs_init");
     
     // 检查NVS是否已经初始化，避免重复初始化
     if (nvs_init_flag) {
@@ -53,6 +53,7 @@ esp_err_t wi_nvs_init() {
  */
 esp_err_t wi_nvs_load_config() {
     // 初始化NVS系统，为后续的配置读写操作做准备
+    ESP_LOGI(LOG_TAG, "执行wi_nvs_load_config");
     wi_nvs_init();
 
     nvs_handle_t nvs_handle;
@@ -65,7 +66,7 @@ esp_err_t wi_nvs_load_config() {
     }
     
     // 从NVS中读取WiFi SSID配置到全局配置结构体中
-    size_t length = sizeof(WI_Config.sta.ssid);
+    size_t length = 32;
     err_code = nvs_get_str(nvs_handle, WI_NVS_KEY_CONFIG_SSID, WI_Config.sta.ssid, &length);
     if (err_code != ESP_OK) {
         // 记录读取SSID失败的错误信息
@@ -74,7 +75,7 @@ esp_err_t wi_nvs_load_config() {
     }
     
     // 从NVS中读取WiFi密码配置到全局配置结构体中
-    length = sizeof(WI_Config.sta.password);
+    length = 32;
     err_code = nvs_get_str(nvs_handle, WI_NVS_KEY_CONFIG_PASSWORD, WI_Config.sta.password, &length);
     if (err_code != ESP_OK) {
         // 记录读取密码失败的错误信息
@@ -120,7 +121,7 @@ esp_err_t wi_nvs_save_config() {
     err_code = nvs_set_str(nvs_handle, WI_NVS_KEY_CONFIG_PASSWORD, WI_Config.sta.password);
     if (err_code != ESP_OK) {
         // 记录保存密码失败的错误信息
-        ESP_LOGW(LOG_TAG, "从NVS中保存Config Password失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
+        ESP_LOGW(LOG_TAG, "从NVS中保存config Password失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
         return err_code;
     }
     
