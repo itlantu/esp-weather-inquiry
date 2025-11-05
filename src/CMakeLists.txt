@@ -2,7 +2,6 @@ file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 list(APPEND sources 
     "${CMAKE_CURRENT_SOURCE_DIR}/parser/city_code.cc"
     "${CMAKE_CURRENT_SOURCE_DIR}/comm/fetch_weather.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/comm/config_web.cc"
 )
 
 get_filename_component(include_dirs "${CMAKE_CURRENT_SOURCE_DIR}/../include" ABSOLUTE)
@@ -16,6 +15,7 @@ idf_component_register(
     REQUIRES
         esp_wifi
         esp_event
+        esp_system
         freertos
         nvs_flash
         esp_http_client
