@@ -10,7 +10,6 @@
         h1 { color: #2c3e50; text-align: center; margin: 25px 0; font-weight: 600; letter-spacing: 0.5px; }
         h2 { color: #2c3e50; margin: 0 0 20px 0; font-size: 22px; border-left: 4px solid #42b983; padding-left: 12px; }
         .form-item {margin-bottom: 15px;}
-        p { color: gray; margin: 25px 0; font-weight: 600; letter-spacing: 0.5px; }
         label {display: block;margin-bottom: 5px;color: #555;}
         input {width: 100%;padding: 8px;box-sizing: border-box;border: 1px solid #ccc;border-radius: 4px;font-size: 16px;}
         input[type='text'] { flex: 1; padding: 12px 15px; font-size: 16px; border: 1px solid #e0e0e0; border-radius: 8px; transition: border 0.3s; }
@@ -25,11 +24,11 @@
         <h1>WiFi配置</h1>
         <form method="post" action="/config">
             <div class="form-item">
-                <label for="ssid"><h2>WiFi名称 </h2><p>(当前%s)</p></label>
+                <label for="ssid"><h2>WiFi名称 </h2></label>
                 <input type="text" id="ssid" name="ssid" required placeholder="请输入WiFi名称">
             </div>
             <div class="form-item">
-                <label for="password"><h2>WiFi密码 </h2><p>(当前%s)</p></label>
+                <label for="password"><h2>WiFi密码 </h2></label>
                 <input type="password" id="password" name="password" placeholder="无密码可留空">
             </div>
             <input type="submit" value="保存配置"></input>
