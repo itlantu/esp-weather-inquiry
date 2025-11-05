@@ -1,4 +1,3 @@
-#include "wi/comm/wifi.h"
 #include "esp_http_client.h"
 #include "esp_http_server.h"
 #include "esp_log.h"
@@ -6,13 +5,13 @@
 #include "esp_wifi.h"
 
 #include "wi/comm/web.h"
-#include "wi/comm/config_web.h"
 #include "wi/config.h"
 #include "wi/nvs.h"
 
 #define LOG_TAG "wi_wifi"
-httpd_handle_t index_server_handle = NULL;
-httpd_handle_t index_config_handle = NULL;
+httpd_handle_t server_handle = NULL;
+// httpd_handle_t index_config_handle = NULL;
+httpd_config_t web_httpd_config = HTTPD_DEFAULT_CONFIG();
 
 /**
  * @brief WiFi事件处理函数
@@ -41,32 +40,18 @@ static void wifi_event_handler(void *args, esp_event_base_t event_base, int32_t 
 		// 记录连接断开信息并尝试重新连接
 		ESP_LOGI(LOG_TAG, "WIFI连接断开, 正在尝试重连");
 		esp_wifi_connect();
-
-		// 停止web服务器以避免在未连接网络时提供服务
-		if (index_server_handle == NULL)
-			return;
-		httpd_stop(index_server_handle);
-		index_server_handle = NULL;
 	}
 
-	// 手机连接AP
+	// 设备连接AP
 	if (event_id == WIFI_EVENT_AP_STACONNECTED) {
 		wifi_event_ap_staconnected_t *conn = (wifi_event_ap_staconnected_t *) event_data;
 		ESP_LOGI(LOG_TAG, "其他设备已连接AP MAC: " MACSTR ", AID: %d", MAC2STR(conn->mac), conn->aid);
-		if(index_config_handle == NULL)
-            wi_start_config_webserver(&index_config_handle);
 	}
 
-	// 手机断开AP
+	// 设备断开AP
 	else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) {
 		wifi_event_ap_stadisconnected_t *disconn = (wifi_event_ap_stadisconnected_t *) event_data;
 		ESP_LOGI(LOG_TAG, "其他设备连接AP已断开 MAC: " MACSTR ", 原因: %d", MAC2STR(disconn->mac), disconn->reason);
-
-        if(index_config_handle != NULL){
-            return;
-        }
-        httpd_stop(index_config_handle);
-		index_config_handle = NULL;
 	}
 }
 
@@ -102,11 +87,6 @@ static void ip_event_handler(void *args, esp_event_base_t event_base, int32_t ev
 
 	// 记录获取到的IP地址信息
 	ESP_LOGI(LOG_TAG, "本机获取到IP: " IPSTR, IP2STR(ipv4_addr));
-
-	// 如果Web服务器尚未启动，则启动Web服务器
-	if (index_server_handle == NULL) {
-		wi_start_webserver(&index_server_handle);
-	}
 }
 
 /**
@@ -121,6 +101,8 @@ esp_err_t wi_wifi_init() {
 	// 记录WiFi初始化函数执行的信息日志
 	ESP_LOGI(LOG_TAG, "执行wi_wifi_init");
 
+	web_httpd_config.ctrl_port = WI_Config.web.port;
+
 	// 初始化NVS，用于存储WiFi配置等信息
 	wi_nvs_init();
 
@@ -130,9 +112,11 @@ esp_err_t wi_wifi_init() {
 	ESP_ERROR_CHECK(esp_event_loop_create_default());
 	// 创建默认的WiFi站点模式接口
 	ESP_ERROR_CHECK(esp_netif_create_default_wifi_sta() != NULL ? ESP_OK : ESP_FAIL);
+    // 创建默认的WiFi接入点模式接口
+    ESP_ERROR_CHECK(esp_netif_create_default_wifi_ap() != NULL ? ESP_OK : ESP_FAIL);
 
 	// 初始化WiFi，使用默认配置
-	wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
+	wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();;
 	ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
 
 	// 注册WiFi事件处理函数，处理所有WiFi事件
@@ -146,24 +130,24 @@ esp_err_t wi_wifi_init() {
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
 
 	// 配置AP连接参数
-	wifi_config_t wifi_ap_config = {.ap = {
-											.ssid_len = 0, // 自动计算长度（以\0结尾）
-											.max_connection = 4,
-											.ssid_hidden = 0,
-											.authmode = WIFI_AUTH_WPA3_PSK,
-											.sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
-											.pmf_cfg =
-													{
-															.required = true,
-													},
-									}};
+	wifi_config_t wifi_ap_config = {
+		.ap = {
+			.ssid_len = 0, // 自动计算长度（以\0结尾）
+			.max_connection = 4,
+			.ssid_hidden = 0,
+			.authmode = WIFI_AUTH_WPA2_PSK, // 改为更常用的WPA2加密
+			.pmf_cfg ={
+				.required = true,
+			},
+		}
+	};
 	// 从配置结构体中复制SSID和密码
 	strncpy((char *) wifi_ap_config.ap.ssid, WI_Config.ap.ssid, strlen(WI_Config.ap.ssid));
 	strncpy((char *) wifi_ap_config.ap.password, WI_Config.ap.password, strlen(WI_Config.ap.password));
 	wifi_ap_config.ap.max_connection = 4;
 	// 记录要连接的WiFi信息
 	ESP_LOGI(LOG_TAG, "尝试启动AP: %s | 密码: %s", (char *) wifi_ap_config.ap.ssid,
-			 (char *) wifi_ap_config.ap.password);
+		 (char *) wifi_ap_config.ap.password);
 	// 设置WiFi为AP模式并配置
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_ap_config));
 
@@ -174,11 +158,13 @@ esp_err_t wi_wifi_init() {
 	strncpy((char *) wifi_sta_config.sta.password, WI_Config.sta.password, strlen(WI_Config.sta.password));
 	// 记录要连接的WiFi信息
 	ESP_LOGI(LOG_TAG, "尝试连接wifi: %s | 密码: %s", (char *) wifi_sta_config.sta.ssid,
-			 (char *) wifi_sta_config.sta.password);
+		 (char *) wifi_sta_config.sta.password);
 	// 设置WiFi为STA模式并配置
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_config));
 	// 启动WiFi
 	ESP_ERROR_CHECK(esp_wifi_start());
+
+	wi_start_webserver(&server_handle, &web_httpd_config);
 
 	// 返回初始化成功状态
 	return ESP_OK;
