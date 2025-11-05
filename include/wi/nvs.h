@@ -9,8 +9,8 @@ extern "C" {
 #include "wi/config.h"
 
 #define WI_NVS_KEY_HISTORY "wi_history"
-#define WI_NVS_KEY_CONFIG_SSID "wi_config_ssid"
-#define WI_NVS_KEY_CONFIG_PASSWORD "wi_config_password"
+#define WI_NVS_KEY_CONFIG_SSID "wi_ap_ssid"
+#define WI_NVS_KEY_CONFIG_PASSWORD "wi_ap_passwd"
 
 esp_err_t wi_nvs_init();
 
