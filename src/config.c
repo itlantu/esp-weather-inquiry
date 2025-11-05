@@ -1,16 +1,26 @@
 #include "wi/config.h"
 #include <string.h>
+#include "wi/nvs.h"
 
 struct WI_Config_t WI_Config = {
-	.wifi = {
-		.ssid = WI_CONFIG_WIFI_SSID,
-		.password = WI_CONFIG_WIFI_PASSWORD,
+	.sta = {
+		.ssid = WI_CONFIG_STA_SSID,
+		.password = WI_CONFIG_STA_PASSWORD,
+	},
+	.ap = {
+		.ssid = WI_CONFIG_AP_SSID,
+		.password = WI_CONFIG_AP_PASSWORD,
 	},
 	.web = {
-		.port = WI_CONFIG_WEB_PORT
+		.port = WI_CONFIG_WEB_PORT,
+		.title = WI_CONFIG_WEB_TITLE,
 	}
 };
 
+
+void wi_config_init(){
+	wi_nvs_load_config();
+}
 
 /**
  * @brief 设置WiFi的SSID配置
@@ -21,7 +31,7 @@ struct WI_Config_t WI_Config = {
  */
 void wi_config_set_wifi(const char* ssid) {
     // 安全地将SSID复制到配置结构体中，最多复制32个字符
-    strncpy((char*)WI_Config.wifi.ssid, ssid, 32);
+    strncpy((char*)WI_Config.sta.ssid, ssid, 32);
 }
 
 /**
@@ -34,5 +44,5 @@ void wi_config_set_wifi(const char* ssid) {
  */
 void wi_config_set_password(const char* password) {
     // 安全地将密码复制到配置结构体中，最多复制64个字符
-    strncpy((char*)WI_Config.wifi.password, password, 64);
+    strncpy((char*)WI_Config.sta.password, password, 64);
 }

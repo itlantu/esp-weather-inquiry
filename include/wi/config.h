@@ -5,22 +5,37 @@
 #include "esp_netif_ip_addr.h"
 
 /* 默认配置 */
-#define WI_CONFIG_DEFAULT_WIFI_SSID "ssid"
-#define WI_CONFIG_DEFAULT_WIFI_PASSWORD  "password"
+#define WI_CONFIG_DEFAULT_STA_SSID "ssid"
+#define WI_CONFIG_DEFAULT_STA_PASSWORD  "password"
+#define WI_CONFIG_DEFAULT_AP_SSID "esp-weather-inquiry-ap"
+#define WI_CONFIG_DEFAULT_AP_PASSWORD  "12345678"
 #define WI_CONFIG_DEFAULT_WEB_PORT 80
 #define WI_CONFIG_DEFAULT_UART_BAUD_RATE 115200
+#define WI_CONFIG_DEFAULT_WEB_TITLE "ESP-Weather-Inquiry"
 
 /* 配置项 */
-#ifndef WI_CONFIG_WIFI_SSID
-#define WI_CONFIG_WIFI_SSID WI_CONFIG_DEFAULT_WIFI_SSID
+#ifndef WI_CONFIG_STA_SSID
+#define WI_CONFIG_STA_SSID WI_CONFIG_DEFAULT_STA_SSID
 #endif
 
-#ifndef WI_CONFIG_WIFI_PASSWORD
-#define WI_CONFIG_WIFI_PASSWORD WI_CONFIG_DEFAULT_WIFI_PASSWORD
+#ifndef WI_CONFIG_STA_PASSWORD
+#define WI_CONFIG_STA_PASSWORD WI_CONFIG_DEFAULT_STA_PASSWORD
+#endif
+
+#ifndef WI_CONFIG_AP_SSID
+#define WI_CONFIG_AP_SSID WI_CONFIG_DEFAULT_AP_SSID
+#endif
+
+#ifndef WI_CONFIG_AP_PASSWORD
+#define WI_CONFIG_AP_PASSWORD WI_CONFIG_DEFAULT_AP_PASSWORD
 #endif
 
 #ifndef WI_CONFIG_WEB_PORT
 #define WI_CONFIG_WEB_PORT WI_CONFIG_DEFAULT_WEB_PORT
+#endif
+
+#ifndef WI_CONFIG_WEB_TITLE
+#define WI_CONFIG_WEB_TITLE WI_CONFIG_DEFAULT_WEB_TITLE
 #endif
 
 #ifndef WI_CONFIG_UART_BAUD_RATE
@@ -31,11 +46,16 @@
 struct WI_Config_t{
 	struct {
 		char ssid[32];
-		char password[64];
-	}wifi;
+		char password[32];
+	}sta;
+	struct {
+		char ssid[32];
+		char password[32];
+	}ap;
 	struct {
 		esp_ip4_addr_t host_ip;
 		uint32_t port;
+		char title[50];
 	}web;
 };
 
