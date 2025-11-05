@@ -2,12 +2,14 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "wi/comm/wifi.h"
+#include "wi/config.h"
 
 #define LOG_TAG "wi_main"
 
 void app_main(void){
 	ESP_LOGI(LOG_TAG, "app main函数执行");
 	wi_wifi_init();
+	wi_config_init();
 
 	while (1) {
 		vTaskDelay(pdMS_TO_TICKS(500));
