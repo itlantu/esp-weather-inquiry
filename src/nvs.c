@@ -73,15 +73,17 @@ esp_err_t wi_nvs_load_config() {
         ESP_LOGW(LOG_TAG, "从NVS中读取Config SSID失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
         return err_code;
     }
+    ESP_LOGI(LOG_TAG, "SSID读取结果 %s", WI_Config.sta.ssid);
     
     // 从NVS中读取WiFi密码配置到全局配置结构体中
     length = 32;
     err_code = nvs_get_str(nvs_handle, WI_NVS_KEY_CONFIG_PASSWORD, WI_Config.sta.password, &length);
     if (err_code != ESP_OK) {
         // 记录读取密码失败的错误信息
-        ESP_LOGW(LOG_TAG, "从NVS中读取Config Password失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
+        ESP_LOGW(LOG_TAG, "从NVS中读取Config password失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
         return err_code;
     }
+    ESP_LOGI(LOG_TAG, "password读取结果 %s", WI_Config.sta.password);
 
     return ESP_OK;
 }
@@ -108,7 +110,6 @@ esp_err_t wi_nvs_save_config() {
     }
     
     // 保存WiFi SSID到NVS存储中
-    size_t length = sizeof(WI_Config.sta.ssid);
     err_code = nvs_set_str(nvs_handle, WI_NVS_KEY_CONFIG_SSID, WI_Config.sta.ssid);
     if (err_code != ESP_OK) {
         // 记录保存SSID失败的错误信息
@@ -117,7 +118,6 @@ esp_err_t wi_nvs_save_config() {
     }
     
     // 保存WiFi密码到NVS存储中
-    length = sizeof(WI_Config.sta.password);
     err_code = nvs_set_str(nvs_handle, WI_NVS_KEY_CONFIG_PASSWORD, WI_Config.sta.password);
     if (err_code != ESP_OK) {
         // 记录保存密码失败的错误信息
