@@ -36,7 +36,7 @@ esp_err_t root_get_handler(httpd_req_t *req) {
     size_t response_length = 0;
 
     // 获取基础HTML模板并获取其长度
-    const char *index_html = tool_get_index_html(&response_length);
+    const char *index_html = get_index_html(&response_length);
     // 计算总响应长度 = 基础HTML长度 + 天气数据HTML长度
     response_length += wi_get_fetch_html_size();
     
