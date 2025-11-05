@@ -193,3 +193,8 @@ esp_err_t wi_paser_get_str_find(const char* str, const char* find, size_t* end_p
     // 无论是否找到子字符串，都返回ESP_OK
     return ESP_OK;
 }
+
+esp_err_t wi_url_decode(char* result, const char* encode_data){
+    std::string_view encode_view{encode_data};
+    return url_decode(result, encode_view);
+}
