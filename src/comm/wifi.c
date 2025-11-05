@@ -100,6 +100,7 @@ static void ip_event_handler(void *args, esp_event_base_t event_base, int32_t ev
 esp_err_t wi_wifi_init() {
 	// 记录WiFi初始化函数执行的信息日志
 	ESP_LOGI(LOG_TAG, "执行wi_wifi_init");
+	wi_nvs_load_config();
 
 	web_httpd_config.ctrl_port = WI_Config.web.port;
 
