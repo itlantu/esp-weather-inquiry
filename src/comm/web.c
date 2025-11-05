@@ -199,11 +199,10 @@ esp_err_t config_set_handler(httpd_req_t *req){
     ESP_LOGI(LOG_TAG, "解码后数据: %s", encode);
 
     split_ssid_password(encode, ssid, password);
-    strcpy(WI_Config.ap.ssid, ssid);
-    strcpy(WI_Config.ap.password, password);
-    ESP_LOGI(LOG_TAG, "SSID: %s, Password: %s", WI_Config.ap.ssid, WI_Config.ap.password);
+    strcpy(WI_Config.sta.ssid, ssid);
+    strcpy(WI_Config.sta.password, password);
+    ESP_LOGI(LOG_TAG, "SSID: %s, Password: %s", WI_Config.sta.ssid, WI_Config.sta.password);
 
-    
     wi_nvs_save_config();
 
     ESP_LOGE(LOG_TAG, "软件重启");
@@ -217,7 +216,6 @@ const httpd_uri_t root = {.uri = "/", .method = HTTP_GET, .handler = root_get_ha
 const httpd_uri_t weather = {.uri = "/", .method = HTTP_POST, .handler = weather_post_handler};
 const httpd_uri_t config_get = {.uri = "/config", .method = HTTP_GET, .handler = config_get_handler};
 const httpd_uri_t config_set = {.uri = "/config", .method = HTTP_POST, .handler = config_set_handler};
-
 
 
 /**
