@@ -9,7 +9,7 @@
 char nvs_init_flag = 0;
 
 /**
- * @brief 初始化ESP32的非易失性存储(NVS)系统
+ * @brief 初始化ESP32的NVS
  * @details 此函数负责初始化ESP32的NVS flash存储系统，用于保存持久化数据
  *          如果NVS已经初始化，则直接返回成功，避免重复初始化
  *          如果遇到NVS版本不兼容或没有可用页的情况，会先擦除NVS再重新初始化
@@ -44,8 +44,100 @@ esp_err_t wi_nvs_init() {
 }
 
 /**
+ * @brief 从NVS加载设备配置
+ * 
+ * 此函数负责从ESP32的NVS分区中读取之前保存的WiFi SSID和密码配置，
+ * 并将其加载到全局配置结构体WI_Config中，供系统其他组件使用
+ * 
+ * @return esp_err_t ESP_OK表示加载成功，其他值表示加载失败
+ */
+esp_err_t wi_nvs_load_config() {
+    // 初始化NVS系统，为后续的配置读写操作做准备
+    wi_nvs_init();
+
+    nvs_handle_t nvs_handle;
+    // 打开NVS存储区域，使用WI_NVS_KEY_CONFIG_SSID作为命名空间，以读写模式访问
+    esp_err_t err_code = nvs_open(WI_NVS_KEY_CONFIG_SSID, NVS_READWRITE, &nvs_handle);
+    if (err_code != ESP_OK) {
+        // 记录打开NVS存储失败的错误信息
+        ESP_LOGW(LOG_TAG, "从NVS中打开Config SSID失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
+        return err_code;
+    }
+    
+    // 从NVS中读取WiFi SSID配置到全局配置结构体中
+    size_t length = sizeof(WI_Config.sta.ssid);
+    err_code = nvs_get_str(nvs_handle, WI_NVS_KEY_CONFIG_SSID, WI_Config.sta.ssid, &length);
+    if (err_code != ESP_OK) {
+        // 记录读取SSID失败的错误信息
+        ESP_LOGW(LOG_TAG, "从NVS中读取Config SSID失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
+        return err_code;
+    }
+    
+    // 从NVS中读取WiFi密码配置到全局配置结构体中
+    length = sizeof(WI_Config.sta.password);
+    err_code = nvs_get_str(nvs_handle, WI_NVS_KEY_CONFIG_PASSWORD, WI_Config.sta.password, &length);
+    if (err_code != ESP_OK) {
+        // 记录读取密码失败的错误信息
+        ESP_LOGW(LOG_TAG, "从NVS中读取Config Password失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
+        return err_code;
+    }
+
+    return ESP_OK;
+}
+
+/**
+ * @brief 将设备配置保存到NVS
+ * 
+ * 此函数负责将全局配置结构体WI_Config中的WiFi SSID和密码保存到ESP32的NVS分区中，
+ * 确保设备重启后配置信息不会丢失
+ * 
+ * @return esp_err_t ESP_OK表示保存成功，其他值表示保存失败
+ */
+esp_err_t wi_nvs_save_config() {
+    // 初始化NVS系统，为后续的配置读写操作做准备
+    wi_nvs_init();
+
+    nvs_handle_t nvs_handle;
+    // 打开NVS存储区域，使用WI_NVS_KEY_CONFIG_SSID作为命名空间，以读写模式访问
+    esp_err_t err_code = nvs_open(WI_NVS_KEY_CONFIG_SSID, NVS_READWRITE, &nvs_handle);
+    if (err_code != ESP_OK) {
+        // 记录打开NVS存储失败的错误信息
+        ESP_LOGW(LOG_TAG, "从NVS中打开Config SSID失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
+        return err_code;
+    }
+    
+    // 保存WiFi SSID到NVS存储中
+    size_t length = sizeof(WI_Config.sta.ssid);
+    err_code = nvs_set_str(nvs_handle, WI_NVS_KEY_CONFIG_SSID, WI_Config.sta.ssid);
+    if (err_code != ESP_OK) {
+        // 记录保存SSID失败的错误信息
+        ESP_LOGW(LOG_TAG, "从NVS中保存Config SSID失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
+        return err_code;
+    }
+    
+    // 保存WiFi密码到NVS存储中
+    length = sizeof(WI_Config.sta.password);
+    err_code = nvs_set_str(nvs_handle, WI_NVS_KEY_CONFIG_PASSWORD, WI_Config.sta.password);
+    if (err_code != ESP_OK) {
+        // 记录保存密码失败的错误信息
+        ESP_LOGW(LOG_TAG, "从NVS中保存Config Password失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
+        return err_code;
+    }
+    
+    // 提交所有更改到NVS存储，确保数据被实际写入闪存
+    err_code = nvs_commit(nvs_handle);
+    if (err_code != ESP_OK) {
+        // 记录提交更改失败的错误信息
+        ESP_LOGW(LOG_TAG, "从NVS中提交Config失败, 错误原因: %s (%d)", esp_err_to_name(err_code), err_code);
+        return err_code;
+    }
+
+    return ESP_OK;
+}
+
+/**
  * @brief 从ESP32的NVS中加载历史天气查询数据
- * @details 此函数负责从ESP32的NVS(非易失性存储)中读取历史天气数据
+ * @details 此函数负责从ESP32的NVS中读取历史天气数据
  *          如果NVS尚未初始化，会先调用wi_nvs_init()进行初始化
  *          读取成功后，数据将被复制到传入的缓冲区中
  * @param[out] history_data 用于存储读取历史数据的字符数组缓冲区
@@ -91,7 +183,7 @@ esp_err_t wi_nvs_load_history(char* history_data){
 
 /**
  * @brief 将天气查询历史数据保存到ESP32的NVS中
- * @details 此函数负责将天气查询历史数据持久化存储到ESP32的NVS(非易失性存储)中
+ * @details 此函数负责将天气查询历史数据持久化存储到ESP32的NVS中
  *          如果NVS尚未初始化，会先调用wi_nvs_init()进行初始化
  *          写入数据后需要调用nvs_commit()确保数据被实际写入闪存
  * @param[in] history_data 要保存的历史天气数据字符串
