@@ -76,7 +76,7 @@ esp_err_t wi_nvs_load_config() {
     ESP_LOGI(LOG_TAG, "SSID读取结果 %s", WI_Config.sta.ssid);
     
     // 从NVS中读取WiFi密码配置到全局配置结构体中
-    length = 32;
+    length = 64;
     err_code = nvs_get_str(nvs_handle, WI_NVS_KEY_CONFIG_PASSWORD, WI_Config.sta.password, &length);
     if (err_code != ESP_OK) {
         // 记录读取密码失败的错误信息
