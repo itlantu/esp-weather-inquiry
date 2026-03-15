@@ -45,17 +45,17 @@
 /* 结构体与函数声明 */
 struct WI_Config_t{
 	struct {
-		char ssid[32];
-		char password[32];
+		char ssid[32];       // WiFi SSID，最大32字符
+		char password[64];    // WiFi 密码，最大64字符
 	}sta;
 	struct {
-		char ssid[32];
-		char password[32];
+		char ssid[32];       // AP模式SSID，最大32字符
+		char password[64];   // AP模式密码，最大64字符
 	}ap;
 	struct {
 		esp_ip4_addr_t host_ip;
 		uint32_t port;
-		char title[50];
+		char title[50];      // 网页标题，最大50字符
 	}web;
 };
 
