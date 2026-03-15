@@ -30,8 +30,9 @@ void wi_config_init(){
  * @param ssid 要设置的WiFi网络名称
  */
 void wi_config_set_wifi(const char* ssid) {
-    // 安全地将SSID复制到配置结构体中，最多复制32个字符
-    strncpy((char*)WI_Config.sta.ssid, ssid, 32);
+    // 安全地将SSID复制到配置结构体中，确保null终止
+    strncpy((char*)WI_Config.sta.ssid, ssid, 31);
+    WI_Config.sta.ssid[31] = '\0';
 }
 
 /**
@@ -43,6 +44,7 @@ void wi_config_set_wifi(const char* ssid) {
  * @note 实际产品中应注意密码的安全性，避免明文存储或不当记录
  */
 void wi_config_set_password(const char* password) {
-    // 安全地将密码复制到配置结构体中，最多复制64个字符
-    strncpy((char*)WI_Config.sta.password, password, 64);
+    // 安全地将密码复制到配置结构体中，确保null终止
+    strncpy((char*)WI_Config.sta.password, password, 63);
+    WI_Config.sta.password[63] = '\0';
 }
