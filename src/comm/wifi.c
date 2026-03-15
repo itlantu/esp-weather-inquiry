@@ -117,7 +117,7 @@ esp_err_t wi_wifi_init() {
     ESP_ERROR_CHECK(esp_netif_create_default_wifi_ap() != NULL ? ESP_OK : ESP_FAIL);
 
 	// 初始化WiFi，使用默认配置
-	wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();;
+	wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
 	ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
 
 	// 注册WiFi事件处理函数，处理所有WiFi事件
